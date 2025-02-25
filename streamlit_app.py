@@ -6,13 +6,13 @@ from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.chains import RetrievalQA
 from langchain.llms import Ollama
 
+url = 'https://info.eminenceorganics.com/skin-care-routine'
+
 @st.cache_resource
-def load_vectorstore(urls):
-    # Load documents
-    docs = []
-    for url in urls:
-        loader = WebBaseLoader(url)
-        docs.extend(loader.load())
+def load_webpage_content(url):
+    loader = WebBaseLoader(url)
+    documents = loader.load()
+    return documents
 
     # Split documents
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
