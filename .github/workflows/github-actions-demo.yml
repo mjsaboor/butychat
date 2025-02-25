@@ -1,0 +1,38 @@
+name: Deploy App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      run: |
+        pip install fastapi uvicorn langchain faiss-cpu transformers sentence-transformers
+
+    - name: Install Ollama (if applicable)
+      run: |
+        curl -fsSL https://ollama.ai/install.sh | sh
+
+    - name: Start Ollama Server
+      run: |
+        # Start the Ollama server in the background
+        ollama serve &
+        # Optional: Wait for Ollama to be ready
+        sleep 10
+
+    - name: Run FastAPI Server
+      run: |
+        uvicorn app:app --host 0.0.0.0 --port 8000 --reload
