@@ -1,3 +1,4 @@
+from fastapi import FastAPI
 import streamlit as st
 from langchain_community.document_loaders import WebBaseLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -5,6 +6,8 @@ from langchain.vectorstores import FAISS
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.chains import RetrievalQA
 from langchain.llms import Ollama
+
+app = FastAPI()
 
 url = 'https://info.eminenceorganics.com/skin-care-routine'
 
