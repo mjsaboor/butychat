@@ -15,12 +15,12 @@ def load_pdf_content(file_path):
 
     # Step 2: Split documents into smaller chunks
 def split_documents(documents, chunk_size=512, chunk_overlap=50):
-    #text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap,
-    #length_function=len)
-    text_splitter = TokenTextSplitter(
-        chunk_size=chunk_size,  # Tokens, not characters
-        chunk_overlap=chunk_overlap,
-        encoding_name="cl100k_base")
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap,
+    length_function=len)
+   #text_splitter = TokenTextSplitter(
+   #    chunk_size=chunk_size,  # Tokens, not characters
+   #    chunk_overlap=chunk_overlap,
+   #    encoding_name="cl100k_base")
     return text_splitter.split_documents(documents)
 
 # Step 3: Create a vector store for retrieval
@@ -34,14 +34,14 @@ def create_vectorstore(chunks):
 # Step 4: Create the RAG pipeline
 def create_rag_pipeline(vectorstore):
     retriever = vectorstore.as_retriever()
-    llm = Ollama(model="gemma3:1b")  # Ensure Ollama is running
+    llm = Ollama(model="deepseek-r1:32b-qwen-distill-q4_K_M")  # Ensure Ollama is running
  
     qa_chain = RetrievalQA.from_chain_type(llm=llm, retriever=retriever)
     return qa_chain
 
 def main():
     # Load webpage content
-    file_path = '/content/drive/MyDrive/dermo ChatBot/farsi-skin routine.pdf'  # Replace with your PDF file path
+    file_path = '/workspaces/butychat/farsi-skin routine.pdf'  # Replace with your PDF file path
     print(f"Loading content from {file_path}...")
     documents = load_pdf_content(file_path)
 
