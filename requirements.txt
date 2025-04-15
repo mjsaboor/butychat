@@ -1,7 +1,10 @@
-langchain
-langchain-community
-langchain-text-splitters
-faiss-cpu
-sentence-transformers
-PyPDF
-requests
+```
+fastapi==0.95.1
+uvicorn==0.22.0
+pydantic==1.10.7
+langchain==0.0.267
+faiss-cpu==1.7.4
+transformers==4.30.2
+torch==2.0.1
+pypdf==3.8.1
+```

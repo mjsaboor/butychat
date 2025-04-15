@@ -1,0 +1,282 @@
+<!-- static/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beauty RAG System</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            direction: rtl;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background-color: #ff6b6b;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .profile-section, .chat-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: #333;
+            margin-top: 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .checkbox-group {
+            margin-bottom: 15px;
+        }
+        .checkbox-group label {
+            display: inline-flex;
+            align-items: center;
+            margin-right: 15px;
+            font-weight: normal;
+        }
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin-right: 5px;
+        }
+        button {
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #ff5252;
+        }
+        .chat-input {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        #query {
+            flex: 1;
+            margin-right: 10px;
+        }
+        .chat-history {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            padding: 15px;
+            border-radius: 4px;
+        }
+        .message {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .user-message {
+            background-color: #e3f2fd;
+            text-align: left;
+        }
+        .bot-message {
+            background-color: #f1f1f1;
+            text-align: right;
+        }
+        .loading {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>سیستم پاسخگوی سلامت پوست</h1>
+        </header>
+
+        <div class="profile-section" id="profileSection">
+            <h2>پروفایل شما</h2>
+            <div>
+                <label for="skinType">نوع پوست:</label>
+                <select id="skinType">
+                    <option value="خشک">خشک</option>
+                    <option value="چرب">چرب</option>
+                    <option value="مختلط">مختلط</option>
+                    <option value="نرمال">نرمال</option>
+                </select>
+            </div>
+            <div>
+                <label for="makeupFrequency">دفعات آرایش در هفته:</label>
+                <select id="makeupFrequency">
+                    <option value="بدون آرایش">بدون آرایش</option>
+                    <option value="کمتر از 2 بار">کمتر از 2 بار</option>
+                    <option value="2 تا 5 بار">2 تا 5 بار</option>
+                    <option value="بیشتر از 5 بار">بیشتر از 5 بار</option>
+                </select>
+            </div>
+            <div>
+                <label>نگرانی‌های پوستی:</label>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" name="skinConcern" value="چروک"> چروک</label>
+                    <label><input type="checkbox" name="skinConcern" value="خشکی"> خشکی</label>
+                    <label><input type="checkbox" name="skinConcern" value="منافذ باز"> منافذ باز</label>
+                    <label><input type="checkbox" name="skinConcern" value="جوش"> جوش</label>
+                    <label><input type="checkbox" name="skinConcern" value="قرمزی"> قرمزی</label>
+                    <label><input type="checkbox" name="skinConcern" value="کک و مک و لکه"> کک و مک و لکه</label>
+                </div>
+            </div>
+            <button id="saveProfile">ذخیره پروفایل</button>
+        </div>
+
+        <div class="chat-section hidden" id="chatSection">
+            <h2>چت با دستیار سلامت پوست</h2>
+            <div class="chat-history" id="chatHistory"></div>
+            <div class="loading hidden" id="loadingIndicator">در حال پردازش...</div>
+            <div class="chat-input">
+                <input type="text" id="query" placeholder="سوال خود را بپرسید...">
+                <button id="sendQuery">ارسال</button>
+            </div>
+            <button id="editProfile">ویرایش پروفایل</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const profileSection = document.getElementById('profileSection');
+            const chatSection = document.getElementById('chatSection');
+            const saveProfileBtn = document.getElementById('saveProfile');
+            const editProfileBtn = document.getElementById('editProfile');
+            const sendQueryBtn = document.getElementById('sendQuery');
+            const queryInput = document.getElementById('query');
+            const chatHistory = document.getElementById('chatHistory');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+
+            let userProfile = null;
+
+            saveProfileBtn.addEventListener('click', function() {
+                const skinType = document.getElementById('skinType').value;
+                const makeupFrequency = document.getElementById('makeupFrequency').value;
+                const skinConcerns = Array.from(document.querySelectorAll('input[name="skinConcern"]:checked'))
+                    .map(checkbox => checkbox.value);
+
+                if (skinConcerns.length === 0) {
+                    alert('لطفا حداقل یک نگرانی پوستی انتخاب کنید.');
+                    return;
+                }
+
+                userProfile = {
+                    skin_type: skinType,
+                    makeup_frequency: makeupFrequency,
+                    skin_concerns: skinConcerns
+                };
+
+                profileSection.classList.add('hidden');
+                chatSection.classList.remove('hidden');
+                
+                // Add welcome message
+                addBotMessage('سلام! من دستیار سلامت پوست شما هستم. چطور می‌توانم به شما کمک کنم؟');
+            });
+
+            editProfileBtn.addEventListener('click', function() {
+                chatSection.classList.add('hidden');
+                profileSection.classList.remove('hidden');
+            });
+
+            sendQueryBtn.addEventListener('click', sendQuery);
+            
+            queryInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendQuery();
+                }
+            });
+
+            async function sendQuery() {
+                const query = queryInput.value.trim();
+                
+                if (!query) return;
+                
+                // Clear input
+                queryInput.value = '';
+                
+                // Show user message
+                addUserMessage(query);
+                
+                // Show loading indicator
+                loadingIndicator.classList.remove('hidden');
+                
+                try {
+                    const response = await fetch('/api/query', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            query: query,
+                            profile: userProfile
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        addBotMessage(data.result);
+                    } else {
+                        addBotMessage('متاسفم، مشکلی در پردازش درخواست شما رخ داد.');
+                        console.error('Error:', data);
+                    }
+                } catch (error) {
+                    addBotMessage('متاسفم، مشکلی در ارتباط با سرور رخ داد.');
+                    console.error('Error:', error);
+                } finally {
+                    loadingIndicator.classList.add('hidden');
+                }
+            }
+
+            function addUserMessage(text) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message user-message';
+                messageDiv.textContent = text;
+                chatHistory.appendChild(messageDiv);
+                scrollToBottom();
+            }
+
+            function addBotMessage(text) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message bot-message';
+                messageDiv.textContent = text;
+                chatHistory.appendChild(messageDiv);
+                scrollToBottom();
+            }
+            
+            function scrollToBottom() {
+                chatHistory.scrollTop = chatHistory.scrollHeight;
+            }
+        });
+    </script>
+</body>
+</html>
