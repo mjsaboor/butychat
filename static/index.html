@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سیستم پاسخگوی سلامت پوست</title>
+    
+    <!-- Bootstrap RTL CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.rtl.min.css">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #ff6b6b;
+            --primary-dark: #ff5252;
+            --primary-light: #ffb3b3;
+            --gray-bg: #f8f9fa;
+        }
+        
+        body {
+            font-family: 'Vazirmatn', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--gray-bg);
+        }
+        
+        .brand-bg {
+            background-color: var(--primary-color);
+        }
+        
+        .brand-text {
+            color: var(--primary-color);
+        }
+        
+        .chat-container {
+            height: 400px;
+            overflow-y: auto;
+            padding: 1rem;
+            background-color: #fff;
+            border-radius: 0.5rem;
+            border: 1px solid #dee2e6;
+        }
+        
+        .user-message {
+            background-color: #e3f2fd;
+            border-radius: 1rem 0 1rem 1rem;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            max-width: 75%;
+            align-self: flex-start;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        
+        .bot-message {
+            background-color: #ffe1e7;
+            border-radius: 0 1rem 1rem 1rem;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            max-width: 75%;
+            margin-left: auto;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        
+        .card {
+            border: none;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08);
+            border-radius: 1rem;
+        }
+        
+        .form-check-input:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+        
+        .btn-primary:disabled {
+            background-color: var(--primary-light);
+            border-color: var(--primary-light);
+        }
+        
+        .form-check-label {
+            margin-right: 0.5rem;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 0.25rem rgba(255, 107, 107, 0.25);
+        }
+        
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.7);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 0.5rem;
+            z-index: 10;
+        }
+        
+        .spinner-border {
+            color: var(--primary-color);
+        }
+        
+        /* Add animation for messages */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .user-message, .bot-message {
+            animation: fadeIn 0.3s ease-out;
+        }
+        .doctor-cta-container {
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.doctor-cta-btn {
+    transition: all 0.2s ease;
+}
+
+.doctor-cta-btn:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+    </style>
+</head>
+<body>
+    <div class="container py-4">
+        <!-- Header -->
+        <div class="text-center mb-4">
+            <h1 class="display-5 fw-bold brand-text">
+                <i class="fas fa-spa me-2"></i>سیستم پاسخگوی سلامت پوست
+            </h1>
+            <div class="col-lg-6 mx-auto">
+                <p class="lead mb-4">پاسخ به سوالات شما درباره سلامت و مراقبت پوست</p>
+            </div>
+        </div>
+        
+        <!-- Profile Section -->
+        <div class="card mb-4" id="profileSection">
+            <div class="card-header brand-bg text-white py-3">
+                <h5 class="mb-0"><i class="fas fa-user-circle me-2"></i>پروفایل شما</h5>
+            </div>
+            <div class="card-body p-4">
+                <form id="profileForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="skinType" class="form-label fw-bold">نوع پوست:</label>
+                            <select id="skinType" class="form-select">
+                                <option value="خشک">خشک</option>
+                                <option value="چرب">چرب</option>
+                                <option value="مختلط">مختلط</option>
+                                <option value="نرمال">نرمال</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="makeupFrequency" class="form-label fw-bold">دفعات آرایش در هفته:</label>
+                            <select id="makeupFrequency" class="form-select">
+                                <option value="بدون آرایش">بدون آرایش</option>
+                                <option value="کمتر از 2 بار">کمتر از 2 بار</option>
+                                <option value="2 تا 5 بار">2 تا 5 بار</option>
+                                <option value="بیشتر از 5 بار">بیشتر از 5 بار</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">نگرانی‌های پوستی:</label>
+                        <div class="row g-3">
+                            <div class="col-md-4 col-sm-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="skinConcern" value="چروک" id="wrinkles">
+                                    <label class="form-check-label" for="wrinkles">چروک</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4 col-sm-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="skinConcern" value="خشکی" id="dryness">
+                                    <label class="form-check-label" for="dryness">خشکی</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4 col-sm-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="skinConcern" value="منافذ باز" id="pores">
+                                    <label class="form-check-label" for="pores">منافذ باز</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4 col-sm-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="skinConcern" value="جوش" id="acne">
+                                    <label class="form-check-label" for="acne">جوش</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4 col-sm-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="skinConcern" value="قرمزی" id="redness">
+                                    <label class="form-check-label" for="redness">قرمزی</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4 col-sm-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="skinConcern" value="کک و مک و لکه" id="spots">
+                                    <label class="form-check-label" for="spots">کک و مک و لکه</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-danger d-none" id="profileError" role="alert">
+                        لطفا حداقل یک نگرانی پوستی انتخاب کنید.
+                    </div>
+                    
+                    <div class="text-center">
+                        <button type="button" id="saveProfile" class="btn btn-primary btn-lg px-4">
+                            <i class="fas fa-save me-2"></i>ذخیره پروفایل
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Chat Section -->
+        <div class="card d-none" id="chatSection">
+            <div class="card-header brand-bg text-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-comments me-2"></i>چت با دستیار سلامت پوست</h5>
+                <button id="editProfile" class="btn btn-light btn-sm">
+                    <i class="fas fa-user-edit me-1"></i>ویرایش پروفایل
+                </button>
+            </div>
+            <div class="card-body p-4">
+                <div class="position-relative mb-4">
+                    <div class="chat-container" id="chatHistory"></div>
+                    <div class="loading-overlay d-none" id="loadingIndicator">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">در حال پردازش...</span>
+                        </div>
+                        <div class="mt-3 text-center" id="processingStatus">در حال پردازش...</div>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <input type="text" id="query" class="form-control" placeholder="سوال خود را بپرسید..." aria-label="سوال شما">
+                    <button class="btn btn-primary" type="button" id="sendQuery">
+                        <i class="fas fa-paper-plane me-1"></i>ارسال
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+                    <!-- Add this HTML right after the input group in your HTML -->
+            <div class="doctor-cta-container mt-3 d-none" id="doctorCTA">
+                <div class="card">
+                <div class="card-body text-center">
+                    <p class="mb-2">آیا می‌خواهید در مورد این پاسخ با پزشک صحبت کنید؟</p>
+                    <button class="btn btn-primary doctor-cta-btn">
+                        <i class="fas fa-user-md me-1"></i>برای اطلاعات بیشتر کلیک کنید
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const profileSection = document.getElementById('profileSection');
+            const chatSection = document.getElementById('chatSection');
+            const saveProfileBtn = document.getElementById('saveProfile');
+            const editProfileBtn = document.getElementById('editProfile');
+            const sendQueryBtn = document.getElementById('sendQuery');
+            const queryInput = document.getElementById('query');
+            const chatHistory = document.getElementById('chatHistory');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const profileError = document.getElementById('profileError');
+            const processingStatus = document.getElementById('processingStatus');
+
+            let userProfile = null;
+            let currentPollingInterval = null;
+
+            saveProfileBtn.addEventListener('click', function() {
+                const skinType = document.getElementById('skinType').value;
+                const makeupFrequency = document.getElementById('makeupFrequency').value;
+                const skinConcerns = Array.from(document.querySelectorAll('input[name="skinConcern"]:checked'))
+                    .map(checkbox => checkbox.value);
+
+                if (skinConcerns.length === 0) {
+                    profileError.classList.remove('d-none');
+                    return;
+                }
+
+                profileError.classList.add('d-none');
+                userProfile = {
+                    skin_type: skinType,
+                    makeup_frequency: makeupFrequency,
+                    skin_concerns: skinConcerns
+                };
+
+                profileSection.classList.add('d-none');
+                chatSection.classList.remove('d-none');
+                
+                // Add welcome message
+                addBotMessage('سلام! من دستیار سلامت پوست شما هستم. چطور می‌توانم به شما کمک کنم؟');
+            });
+
+            editProfileBtn.addEventListener('click', function() {
+                chatSection.classList.add('d-none');
+                profileSection.classList.remove('d-none');
+            });
+
+            sendQueryBtn.addEventListener('click', sendQuery);
+            
+            queryInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendQuery();
+                }
+            });
+
+            async function sendQuery() {
+                const query = queryInput.value.trim();
+                
+                if (!query) return;
+                
+                // Disable input while processing
+                queryInput.disabled = true;
+                sendQueryBtn.disabled = true;
+                
+                // Clear input
+                queryInput.value = '';
+                
+                // Show user message
+                addUserMessage(query);
+                
+                // Show loading indicator
+                loadingIndicator.classList.remove('d-none');
+                processingStatus.textContent = 'ارسال سوال...';
+                
+                try {
+                    // Step 1: Submit the query to get a query ID
+                    const submitResponse = await fetch('/api/query', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            query: query,
+                            profile: userProfile
+                        })
+                    });
+                    
+                    const submitData = await submitResponse.json();
+                    
+                    if (!submitResponse.ok) {
+                        throw new Error(submitData.error || 'خطا در ارسال درخواست');
+                    }
+                    
+                    const queryId = submitData.query_id;
+                    
+                    // Step 2: Poll for results
+                    await pollForResults(queryId);
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    addBotMessage('متاسفم، مشکلی در ارتباط با سرور رخ داد: ' + error.message);
+                    loadingIndicator.classList.add('d-none');
+                    queryInput.disabled = false;
+                    sendQueryBtn.disabled = false;
+                }
+            }
+            
+            async function pollForResults(queryId) {
+                let attempts = 0;
+                const maxAttempts = 180; // Maximum 3 minutes (polling every second)
+                let pollingDelay = 1000; // Start with 1 second polling
+                
+                // Clear any existing polling
+                if (currentPollingInterval) {
+                    clearInterval(currentPollingInterval);
+                }
+                
+                // Set up polling with exponential backoff
+                currentPollingInterval = setInterval(async () => {
+                    attempts++;
+                    
+                    try {
+                        const statusResponse = await fetch(`/api/query/status/${queryId}`);
+                        const statusData = await statusResponse.json();
+                        
+                        // Update status message
+                        if (statusData.status === 'processing') {
+                            processingStatus.textContent = `در حال پردازش... (${Math.round(statusData.elapsed_seconds)} ثانیه)`;
+                        }
+                        
+                        // If we have a result
+                        if (statusResponse.ok && statusData.result) {
+                            clearInterval(currentPollingInterval);
+                            addBotMessage(statusData.result);
+                            loadingIndicator.classList.add('d-none');
+                            queryInput.disabled = false;
+                            sendQueryBtn.disabled = false;
+                            return;
+                        }
+                        
+                        // If we have an error
+                        if (!statusResponse.ok || statusData.error) {
+                            throw new Error(statusData.error || 'خطا در دریافت پاسخ');
+                        }
+                        
+                        // If we've exceeded max attempts
+                        if (attempts >= maxAttempts) {
+                            clearInterval(currentPollingInterval);
+                            throw new Error('زمان پاسخگویی به اتمام رسید. لطفا دوباره تلاش کنید.');
+                        }
+                        
+                    } catch (error) {
+                        clearInterval(currentPollingInterval);
+                        console.error('Polling error:', error);
+                        addBotMessage('متاسفم، مشکلی در دریافت پاسخ رخ داد: ' + error.message);
+                        loadingIndicator.classList.add('d-none');
+                        queryInput.disabled = false;
+                        sendQueryBtn.disabled = false;
+                    }
+                }, pollingDelay);
+            }
+
+            function addUserMessage(text) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message user-message';
+                messageDiv.textContent = text;
+                chatHistory.appendChild(messageDiv);
+                scrollToBottom();
+            }
+
+            function addBotMessage(text) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message bot-message';
+                messageDiv.textContent = text;
+                chatHistory.appendChild(messageDiv);
+                scrollToBottom();
+
+                // Show the doctor CTA after adding the bot message
+                const doctorCTA = document.getElementById('doctorCTA');
+                doctorCTA.classList.remove('d-none');
+            }
+
+            
+            function scrollToBottom() {
+                chatHistory.scrollTop = chatHistory.scrollHeight;
+            }
+        });
+    </script>
+</body>
+</html>
